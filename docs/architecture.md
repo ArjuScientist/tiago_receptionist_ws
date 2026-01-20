@@ -1,122 +1,55 @@
-```mermaid
-
 flowchart LR
 
-
-
 %% NODES (scripts)
-
-ASR((asr\_listen | listen\_asr))
-
-EMO((emotion\_perception | emotion\_detector))
-
-IA((ia\_dialog | ia\_node))
-
-CORE((reception\_core | reception\_manager))
-
-FSM((reception\_core | session\_state))
-
-NAME((user\_name | name\_node))
-
-FACE((face\_detector | face\_detector))
-
-MEM((memory\_manager | memory\_node))
-
-TTS((tts\_speak | speak\_tts))
-
-
+ASR((asr_listen<br/>listen_asr))
+EMO((emotion_perception<br/>emotion_detector))
+IA((ia_dialog<br/>ia_node))
+CORE((reception_core<br/>reception_manager))
+FSM((reception_core<br/>session_state))
+NAME((user_name<br/>name_node))
+FACE((face_detector<br/>face_detector))
+MEM((memory_manager<br/>memory_node))
+TTS((tts_speak<br/>speak_tts))
 
 %% TOPICS
+T_ASR_EN[/asr/enable/]
+T_ASR_OUT[/asr/text_out/]
 
-T\_ASR\_EN\[/asr/enable/]
+T_CAM[/camera_topic/]
+T_XTION[/xtion/rgb/image_color/]
+T_FACE[/face_event/]
+T_EMO[/emotion/state/]
 
-T\_ASR\_OUT\[/asr/text\_out/]
+T_IA_IN[/ia/input_text/]
+T_IA_UN[/ia/user_name/]
+T_IA_OUT[/ia/text_out/]
 
+T_TTS_TXT[/tts/text/]
+T_TTS_SPK[/tts/is_speaking/]
 
-
-T\_CAM\[/camera\_topic/]
-
-T\_XTION\[/xtion/rgb/image\_color/]
-
-T\_FACE\[/face\_event/]
-
-T\_EMO\[/emotion/state/]
-
-
-
-T\_IA\_IN\[/ia/input\_text/]
-
-T\_IA\_UN\[/ia/user\_name/]
-
-T\_IA\_OUT\[/ia/text\_out/]
-
-
-
-T\_TTS\_TXT\[/tts/text/]
-
-T\_TTS\_SPK\[/tts/is\_speaking/]
-
-
-
-T\_NAME\_START\[/name/start/]
-
-T\_NAME\_DONE\[/name/done/]
-
-
+T_NAME_START[/name/start/]
+T_NAME_DONE[/name/done/]
 
 %% FLOWS
+CORE --> T_ASR_EN --> ASR
+ASR --> T_ASR_OUT --> CORE
 
-CORE --> T\_ASR\_EN --> ASR
+T_CAM --> FACE
+FACE --> T_FACE --> CORE
+FACE --> T_FACE --> IA
 
-ASR --> T\_ASR\_OUT --> CORE
+T_XTION --> EMO
+EMO --> T_EMO --> CORE
+EMO --> T_EMO --> IA
 
+CORE --> T_IA_IN --> IA
+IA --> T_IA_OUT --> CORE
+IA --> T_TTS_TXT --> TTS
 
+TTS --> T_TTS_SPK --> CORE
 
-T\_CAM --> FACE
-
-FACE --> T\_FACE --> CORE
-
-FACE --> T\_FACE --> IA
-
-
-
-T\_XTION --> EMO
-
-EMO --> T\_EMO --> CORE
-
-EMO --> T\_EMO --> IA
-
-
-
-CORE --> T\_IA\_IN --> IA
-
-IA --> T\_IA\_OUT --> CORE
-
-IA --> T\_TTS\_TXT --> TTS
-
-
-
-TTS --> T\_TTS\_SPK --> CORE
-
-
-
-CORE --> T\_NAME\_START --> NAME
-
-NAME --> T\_ASR\_EN --> ASR
-
-ASR --> T\_ASR\_OUT --> NAME
-
-NAME --> T\_IA\_UN --> CORE
-
-NAME --> T\_NAME\_DONE --> CORE
-
-NAME --> T\_TTS\_TXT --> TTS
-
-
-
-CORE <--> FSM
-
-CORE <--> MEM
-
-
-
+CORE --> T_NAME_START --> NAME
+NAME --> T_ASR_EN --> ASR
+ASR --> T_ASR_OUT --> NAME
+NAME --> T_IA_UN --> CORE
+NAME --> T_NAME_DONE --> COR
