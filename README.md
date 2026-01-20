@@ -17,66 +17,58 @@ Lili, Kylian and Arjuna
 | `tts_speak`          | `speak_tts`          | Handles robot speech output                                              | `/tts/text`                                      | `/tts/is_speaking`          |
 
 flowchart LR
-  %% ===== NODES (scripts) =====
-  ASR((asr_listen\nlisten_asr))
-  EMO((emotion_perception\nemotion_detector))
-  IA((ia_dialog\nia_node))
-  CORE((reception_core\nreception_manager))
-  FSM((reception_core\nsession_state))
-  NAME((user_name\nname_node))
-  FACE((face_detector\nface_detector))
-  MEM((memory_manager\nmemory_node))
-  TTS((tts_speak\nspeak_tts))
+  %% Nodes as big circles
+  CORE((NODE\nreception_manager)):::node
+  IA((NODE\nia_node)):::node
+  ASR((NODE\nlisten_asr)):::node
+  EMO((NODE\nemotion_detector)):::node
+  FACE((NODE\nface_detector)):::node
+  NAME((NODE\nname_node)):::node
+  TTS((NODE\nspeak_tts)):::node
+  MEM((NODE\nmemory_node)):::node
 
-  %% ===== TOPICS =====
-  T_ASR_EN[/Topic\n/asr/enable/]
-  T_ASR_OUT[/Topic\n/asr/text_out/]
+  %% Topics as rectangles
+  AEN[Topic\n/asr/enable]:::topic
+  AOUT[Topic\n/asr/text_out]:::topic
+  XTION[Topic\n/xtion/rgb/image_color]:::topic
+  EMO_T[Topic\n/emotion/state]:::topic
+  FACE_T[Topic\n/face_event]:::topic
+  IA_IN[Topic\n/ia/input_text]:::topic
+  IA_UN[Topic\n/ia/user_name]:::topic
+  IA_OUT[Topic\n/ia/text_out]:::topic
+  TTS_T[Topic\n/tts/text]:::topic
+  SPK[Topic\n/tts/is_speaking]:::topic
+  NST[Topic\n/name/start]:::topic
+  NDN[Topic\n/name/done]:::topic
+  CAM[Topic\ncamera_topic]:::topic
 
-  T_CAM[/Topic\ncamera_topic/]
-  T_XTION[/Topic\n/xtion/rgb/image_color/]
-  T_FACE[/Topic\n/face_event/]
-  T_EMO[/Topic\n/emotion/state/]
+  %% Flows
+  CORE --> AEN --> ASR
+  ASR --> AOUT --> CORE
 
-  T_IA_IN[/Topic\n/ia/input_text/]
-  T_IA_UN[/Topic\n/ia/user_name/]
-  T_IA_OUT[/Topic\n/ia/text_out/]
+  CAM --> FACE
+  FACE --> FACE_T --> CORE
+  FACE --> FACE_T --> IA
 
-  T_TTS_TXT[/Topic\n/tts/text/]
-  T_TTS_SPK[/Topic\n/tts/is_speaking/]
+  XTION --> EMO
+  EMO --> EMO_T --> CORE
+  EMO --> EMO_T --> IA
 
-  T_NAME_START[/Topic\n/name/start/]
-  T_NAME_DONE[/Topic\n/name/done/]
+  CORE --> IA_IN --> IA
+  IA --> IA_OUT --> CORE
 
-  %% ===== FLOWS (from your table) =====
-  CORE --> T_ASR_EN --> ASR
-  ASR --> T_ASR_OUT --> CORE
+  IA --> TTS_T --> TTS
+  TTS --> SPK --> CORE
 
-  %% Camera / Face
-  T_CAM --> FACE
-  FACE --> T_FACE --> CORE
-  FACE --> T_FACE --> IA
+  CORE --> NST --> NAME
+  NAME --> AEN --> ASR
+  ASR --> AOUT --> NAME
+  NAME --> IA_UN --> CORE
+  NAME --> NDN --> CORE
+  NAME --> TTS_T --> TTS
 
-  %% Emotion pipeline
-  T_XTION --> EMO
-  EMO --> T_EMO --> CORE
-  EMO --> T_EMO --> IA
-
-  %% IA dialog
-  CORE --> T_IA_IN --> IA
-  IA --> T_IA_OUT --> CORE
-  IA --> T_TTS_TXT --> TTS
-
-  %% TTS speaking feedback
-  TTS --> T_TTS_SPK --> CORE
-
-  %% Name flow
-  CORE --> T_NAME_START --> NAME
-  NAME --> T_ASR_EN --> ASR
-  ASR --> T_ASR_OUT --> NAME
-  NAME --> T_IA_UN --> CORE
-  NAME --> T_NAME_DONE --> CORE
-  NAME --> T_TTS_TXT --> TTS
-
-  %% FSM + Memory (no topics provided -> logical links)
-  CORE <--> FSM
   CORE <--> MEM
+
+  classDef node fill:#2b6cb0,stroke:#1a365d,color:#fff,stroke-width:2px;
+  classDef topic fill:#cbd5e0,stroke:#4a5568,color:#111,stroke-width:1px;
+
