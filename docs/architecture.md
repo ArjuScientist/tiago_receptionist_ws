@@ -1,6 +1,7 @@
+# Architecture ROS – TIAGo Receptionist
+mermaid
 flowchart LR
 
-%% ===== NODES (blue) =====
 ASR((asr_listen<br/>listen_asr))
 EMO((emotion_perception<br/>emotion_detector))
 IA((ia_dialog<br/>ia_node))
@@ -11,7 +12,6 @@ FACE((face_detector<br/>face_detector))
 MEM((memory_manager<br/>memory_node))
 TTS((tts_speak<br/>speak_tts))
 
-%% ===== TOPICS (red) =====
 T_ASR_EN[/asr/enable/]
 T_ASR_OUT[/asr/text_out/]
 T_CAM[/camera_topic/]
@@ -26,7 +26,6 @@ T_TTS_SPK[/tts/is_speaking/]
 T_NAME_START[/name/start/]
 T_NAME_DONE[/name/done/]
 
-%% ===== FLOWS =====
 CORE --> T_ASR_EN --> ASR
 ASR --> T_ASR_OUT --> CORE
 
@@ -53,11 +52,3 @@ NAME --> T_TTS_TXT --> TTS
 
 CORE <--> FSM
 CORE <--> MEM
-
-%% ===== STYLES =====
-classDef node fill:#1f77b4,color:#ffffff,stroke:#0b3c5d,stroke-width:2px;
-classDef topic fill:#d62728,color:#ffffff,stroke:#7f0000,stroke-width:2px;
-
-%% Apply styles
-class ASR,EMO,IA,CORE,FSM,NAME,FACE,MEM,TTS node;
-class T_ASR_EN,T_ASR_OUT,T_CAM,T_XTION,T_FACE,T_EMO,T_IA_IN,T_IA_UN,T_IA_OUT,T_TTS_TXT,T_TTS_SPK,T_NAME_START,T_NAME_DONE topic;
