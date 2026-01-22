@@ -1,5 +1,6 @@
 # Architecture ROS – TIAGo Receptionist
-mermaid
+
+```mermaid
 flowchart LR
 
 ASR((asr_listen<br/>listen_asr))
