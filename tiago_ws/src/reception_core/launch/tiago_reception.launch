@@ -1,0 +1,118 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- ================= IA ================= -->
+  <arg name="ia_model" default="llama3.1:8b-instruct-q4_K_M"/>
+  <arg name="ollama_url" default="http://127.0.0.1:11434/api/chat"/>
+
+  <!-- Réglages génération -->
+  <arg name="temperature" default="0.2"/>
+  <arg name="top_p" default="0.9"/>
+  <arg name="num_predict" default="60"/>
+
+  <!-- Perf / contexte (CPU robot) -->
+  <arg name="num_ctx" default="768"/>
+  <arg name="num_thread" default="4"/>
+  <arg name="max_turns" default="4"/>
+
+  <!-- HTTP -->
+  <arg name="http_connect_timeout" default="3.0"/>
+  <arg name="http_timeout" default="120.0"/>
+
+  <!-- Garder le modèle en RAM -->
+  <arg name="keep_alive" default="10m"/>
+
+  <!-- Retry -->
+  <arg name="retry_on_timeout" default="true"/>
+  <arg name="retry_delay_sec" default="0.3"/>
+
+  <!-- ================= CAPTEURS ================= -->
+  <arg name="camera_topic" default="/xtion/rgb/image_raw"/>
+
+  <!-- ================= SONS ================= -->
+  <arg name="beep_start_wav" default="/home/pal/Desktop/tiago_ws/assets/sounds/beep_start.wav"/>
+  <arg name="beep_stop_wav"  default="/home/pal/Desktop/tiago_ws/assets/sounds/beep_stop.wav"/>
+
+  <!-- ================= CORE ================= -->
+  <node pkg="reception_core"
+        type="reception_manager.py"
+        name="reception_manager"
+        output="screen">
+    <param name="tts_cooldown_sec" value="0.35"/>
+  </node>
+
+  <!-- ================= ASR ================= -->
+  <node pkg="asr_listen"
+        type="listen_asr.py"
+        name="listen_asr"
+        output="screen">
+    <param name="device_index" value="7"/>
+    <param name="mic_sample_rate" value="44100"/>
+    <param name="asr_sample_rate" value="16000"/>
+    <param name="model_size" value="base"/>
+    <param name="compute_type" value="int8"/>
+    <param name="language" value="fr"/>
+    <param name="record_sec" value="4.0"/>
+    <param name="beam_size" value="2"/>
+    <param name="vad_filter" value="false"/>
+    <param name="lock_on_tts" value="true"/>
+    <param name="tts_cooldown_sec" value="0.35"/>
+    <param name="enable_beeps" value="true"/>
+    <param name="beep_start_wav" value="$(arg beep_start_wav)"/>
+    <param name="beep_stop_wav" value="$(arg beep_stop_wav)"/>
+  </node>
+
+  <!-- ================= TTS ================= -->
+  <node pkg="tts_speak"
+        type="speak_tts.py"
+        name="speak_tts"
+        output="screen">
+    <param name="manage_asr" value="true"/>
+    <param name="auto_resume_asr" value="false"/>
+    <param name="language" value="fr"/>
+    <param name="mpg123_gain" value="80"/>
+    <param name="asr_resume_delay_sec" value="0.4"/>
+  </node>
+
+  <!-- ================= VISION ================= -->
+  <node pkg="face_detector"
+        type="face_detector.py"
+        name="face_detector"
+        output="screen">
+    <param name="camera_topic" value="$(arg camera_topic)"/>
+  </node>
+
+  <node pkg="emotion_perception"
+        type="emotion_detector.py"
+        name="emotion_detector"
+        output="screen">
+    <param name="camera_topic" value="$(arg camera_topic)"/>
+  </node>
+
+  <!-- ================= IA DIALOG ================= -->
+  <node pkg="ia_dialog"
+        type="ia_node.py"
+        name="ia_dialog"
+        output="screen">
+    <param name="model_name" value="$(arg ia_model)"/>
+    <param name="ollama_url" value="$(arg ollama_url)"/>
+
+    <param name="temperature" value="$(arg temperature)"/>
+    <param name="top_p" value="$(arg top_p)"/>
+    <param name="num_predict" value="$(arg num_predict)"/>
+
+    <param name="num_ctx" value="$(arg num_ctx)"/>
+    <param name="num_thread" value="$(arg num_thread)"/>
+    <param name="max_turns" value="$(arg max_turns)"/>
+
+    <param name="http_connect_timeout" value="$(arg http_connect_timeout)"/>
+    <param name="http_timeout" value="$(arg http_timeout)"/>
+
+    <param name="keep_alive" value="$(arg keep_alive)"/>
+
+    <param name="retry_on_timeout" value="$(arg retry_on_timeout)"/>
+    <param name="retry_delay_sec" value="$(arg retry_delay_sec)"/>
+  </node>
+
+</launch>
+
